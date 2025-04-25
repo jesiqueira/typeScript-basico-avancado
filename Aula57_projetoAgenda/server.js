@@ -1,4 +1,5 @@
 require('dotenv').config()
+const cookieParser = require('cookie-parser')
 
 const express = require('express')
 const app = express()
@@ -19,12 +20,17 @@ mongoose
 
 const path = require('path')
 const routes = require('./routes')
-const { middleGlobal } = require('./src/middlewares/middleware')
+const csrf = require('csurf')
+const { middleGlobal, checkCsrfError, csrfMiddleware } = require('./src/middlewares/middleware')
 
 app.use(express.urlencoded({ extended: true })) //para formulário
 app.use(express.static(path.join(__dirname, 'public'))) //para arquivos estáticos
 app.use(express.json())
+app.use(cookieParser()) //para cookies
+app.use(csrf({ cookie: true })) //middleware para verificar csrf
 app.use(middleGlobal) //middleware será disponível para todas as rotas, para uma rota especifica deve se adicionar o middleware na rota desejada
+app.use(checkCsrfError) //middleware para verificar erro de csrf
+app.use(csrfMiddleware) //middleware para verificar csrf
 
 app.use(routes)
 
